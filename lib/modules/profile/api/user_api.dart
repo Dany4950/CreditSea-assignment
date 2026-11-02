@@ -1,6 +1,7 @@
+import 'package:creditsea/modules/profile/models/user_profile.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
-import '../models/user_profile.dart';
 
 class UserApi {
   UserApi(this._client);

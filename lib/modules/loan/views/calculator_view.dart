@@ -1,8 +1,8 @@
 import 'package:creditsea/core/utils/money.dart';
+import 'package:creditsea/core/widgets/color_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/widgets/card_shell.dart';
-import '../../../core/widgets/color_logo.dart';
 import '../../../core/widgets/form/form_tokens.dart';
 import '../../../core/widgets/form/labeled_field.dart';
 import '../../../core/widgets/form/select_field.dart';
@@ -58,8 +58,8 @@ class _EligibleBody extends StatelessWidget {
   const _EligibleBody({required this.c});
   final CalculatorController c;
 
-  static const _labelStyle =
-      TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: FormTokens.ink);
+  static const _labelStyle = TextStyle(
+      fontSize: 15, fontWeight: FontWeight.w600, color: FormTokens.ink);
 
   @override
   Widget build(BuildContext context) {
@@ -98,18 +98,24 @@ class _EligibleBody extends StatelessWidget {
               )),
         ),
         const SizedBox(height: 28),
-        _ValueRow(label: 'Principal Amount', value: Obx(() => _ValueText(inrSpaced(c.principal.value)))),
+        _ValueRow(
+            label: 'Principal Amount',
+            value: Obx(() => _ValueText(inrSpaced(c.principal.value)))),
         const SizedBox(height: 10),
         Obx(() => LoanSlider(
               value: c.principal.value.toDouble(),
               min: min,
               max: max,
-              divisions: canSlide ? ((max - min) / LoanConfig.amountStep).round() : null,
+              divisions: canSlide
+                  ? ((max - min) / LoanConfig.amountStep).round()
+                  : null,
               onChanged: canSlide ? c.setPrincipal : null,
               semanticFormatter: (v) => inr(v.round()),
             )),
         const SizedBox(height: 30),
-        _ValueRow(label: 'Tenure', value: Obx(() => _ValueText('${c.days.value} Days'))),
+        _ValueRow(
+            label: 'Tenure',
+            value: Obx(() => _ValueText('${c.days.value} Days'))),
         const SizedBox(height: 10),
         Obx(() => LoanSlider(
               value: c.days.value.toDouble(),
@@ -122,8 +128,10 @@ class _EligibleBody extends StatelessWidget {
         const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${LoanConfig.minDays} Days', style: TextStyle(fontSize: 10.5, color: FormTokens.ink)),
-            Text('${LoanConfig.maxDays} Days', style: TextStyle(fontSize: 10.5, color: FormTokens.ink)),
+            Text('${LoanConfig.minDays} Days',
+                style: TextStyle(fontSize: 10.5, color: FormTokens.ink)),
+            Text('${LoanConfig.maxDays} Days',
+                style: TextStyle(fontSize: 10.5, color: FormTokens.ink)),
           ],
         ),
         const SizedBox(height: 36),
@@ -141,7 +149,10 @@ class _EligibleBody extends StatelessWidget {
             'Thank you for choosing CreditSea. Please accept to proceed with the loan details.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 14, height: 1.3, fontWeight: FontWeight.w500, color: Color(0xFF3B7FA6)),
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF3B7FA6)),
           ),
         ),
         const SizedBox(height: 8),
@@ -158,7 +169,10 @@ class _RateChips extends StatelessWidget {
           height: 40,
           child: Center(
             child: Text(text,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: FormTokens.ink)),
+                style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: FormTokens.ink)),
           ),
         ),
       );
@@ -166,9 +180,12 @@ class _RateChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
         children: [
-          Expanded(child: _chip('Interest Per Day  ${LoanConfig.interestPerDayPct}%')),
+          Expanded(
+              child:
+                  _chip('Interest Per Day  ${LoanConfig.interestPerDayPct}%')),
           const SizedBox(width: 12),
-          Expanded(child: _chip('Processing Fee  ${LoanConfig.processingFeePct}%')),
+          Expanded(
+              child: _chip('Processing Fee  ${LoanConfig.processingFeePct}%')),
         ],
       );
 }
@@ -192,7 +209,8 @@ class _ValueRow extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 100, minHeight: 30),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 child: Center(widthFactor: 1, child: value),
               ),
             ),
@@ -221,21 +239,25 @@ class _NotEligible extends StatelessWidget {
       padding: const EdgeInsets.only(top: 40),
       child: Column(
         children: [
-          const Icon(Icons.info_outline_rounded, size: 48, color: AuthTokens.hint),
+          const Icon(Icons.info_outline_rounded,
+              size: 48, color: AuthTokens.hint),
           const SizedBox(height: 16),
           const Text("You can't apply right now",
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Text(e?.reason ?? 'You are not eligible for a loan at the moment.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, height: 1.4, color: AuthTokens.textMuted)),
+              style: const TextStyle(
+                  fontSize: 14, height: 1.4, color: AuthTokens.textMuted)),
           if (e?.activeLoanId != null) ...[
             const SizedBox(height: 16),
             TextButton(
               onPressed: c.viewActiveLoan,
               child: const Text('View application status',
                   style: TextStyle(
-                      color: AuthTokens.actionBlue, fontWeight: FontWeight.w600, fontSize: 15)),
+                      color: AuthTokens.actionBlue,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15)),
             ),
           ],
         ],

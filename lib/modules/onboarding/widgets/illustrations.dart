@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 // Flutter-drawn stand-ins. Replace with the Figma SVG exports via flutter_svg
-// (assets/images/email_illustration.svg, pan_card.svg) when ready.
 
 const _blue = Color(0xFF2D5CE0);
 const _blueLight = Color(0xFF4F7BF0);
@@ -23,8 +22,15 @@ class EmailIllustration extends StatelessWidget {
             child: SizedBox(width: 132, height: 132),
           ),
           Icon(Icons.mark_email_read_rounded, size: 64, color: _blue),
-          Positioned(top: 14, right: 18, child: Icon(Icons.send_rounded, size: 20, color: _blueLight)),
-          Positioned(left: 16, bottom: 22, child: Icon(Icons.alternate_email_rounded, size: 18, color: _blueLight)),
+          Positioned(
+              top: 14,
+              right: 18,
+              child: Icon(Icons.send_rounded, size: 20, color: _blueLight)),
+          Positioned(
+              left: 16,
+              bottom: 22,
+              child: Icon(Icons.alternate_email_rounded,
+                  size: 18, color: _blueLight)),
         ],
       ),
     );
@@ -70,7 +76,8 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const DecoratedBox(
-      decoration: BoxDecoration(color: _blue, borderRadius: BorderRadius.all(Radius.circular(8))),
+      decoration: BoxDecoration(
+          color: _blue, borderRadius: BorderRadius.all(Radius.circular(8))),
       child: SizedBox(
         width: 166,
         height: 102,
@@ -81,7 +88,10 @@ class _Card extends StatelessWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [_Chip(width: 46, height: 5), _Chip(width: 32, height: 16)],
+                children: [
+                  _Chip(width: 46, height: 5),
+                  _Chip(width: 32, height: 16)
+                ],
               ),
               SizedBox(height: 8),
               _Chip(width: 28, height: 22),

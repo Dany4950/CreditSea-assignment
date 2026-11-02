@@ -1,3 +1,6 @@
+import 'package:creditsea/modules/loan/models/loan_page.dart';
+import 'package:creditsea/modules/loan/models/repay_result.dart';
+
 import '../models/eligibility.dart';
 import '../models/loan.dart';
 import '../models/loan_quote.dart';
@@ -23,12 +26,19 @@ abstract interface class LoanRepository {
 
   /// POST /loans/:id/accept -> SUBMITTED, status engine starts
   Future<Loan> acceptOffer(String id);
+
+  /// GET /loans?page&limit -> My Loans (infinite scroll). Page 1 is cached; [refresh] bypasses the cache.
+  Future<LoanPage> fetchLoans({int page = 1, int limit = 10, bool refresh = false});
+
+  /// POST /loans/:id/repay (mock payment) -> loan becomes REPAID and the credit score changes
+  Future<RepayResult> repay(String id, {String method = 'UPI'});
 }
 
 class _Record {
   _Record(this.loan);
   Loan loan;
   DateTime? acceptedAt;
+  bool repaid = false;
 }
 
 class MockLoanRepository implements LoanRepository {
@@ -42,6 +52,7 @@ class MockLoanRepository implements LoanRepository {
 
   /// Status by elapsed seconds since accept (mimics the backend status engine).
   Loan _resolve(_Record r) {
+    if (r.repaid) return r.loan.copyWith(status: LoanStatus.repaid);
     final at = r.acceptedAt;
     if (at == null) return r.loan;
     final s = DateTime.now().difference(at).inSeconds;
@@ -116,5 +127,27 @@ class MockLoanRepository implements LoanRepository {
     if (r == null) throw const LoanException('Loan not found');
     r.acceptedAt ??= DateTime.now();
     return _resolve(r);
+  }
+
+  @override
+  Future<LoanPage> fetchLoans({int page = 1, int limit = 10, bool refresh = false}) async {
+    await _wait();
+    final all = _db.values.where((r) => r.acceptedAt != null).map(_resolve).toList().reversed.toList();
+    final start = (page - 1) * limit;
+    final end = start + limit > all.length ? all.length : start + limit;
+    final items = start >= all.length ? <Loan>[] : all.sublist(start, end);
+    return LoanPage(items: items, page: page, hasMore: end < all.length, total: all.length);
+  }
+
+  @override
+  Future<RepayResult> repay(String id, {String method = 'UPI'}) async {
+    await _wait();
+    final r = _db[id];
+    if (r == null) throw const LoanException('Loan not found');
+    if (_resolve(r).status != LoanStatus.disbursed) {
+      throw const LoanException('Only a disbursed loan can be repaid.');
+    }
+    r.repaid = true;
+    return RepayResult(loan: _resolve(r), creditScore: 650, scoreChange: 50, onTime: true);
   }
 }

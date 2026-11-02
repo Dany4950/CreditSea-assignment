@@ -28,6 +28,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/logo_blue.png
     - assets/icons/
 
   fonts:

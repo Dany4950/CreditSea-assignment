@@ -63,8 +63,9 @@ class CreateAccountController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
     loading.value = true;
     try {
-      await _repo.requestOtp(mobile.text);
-      Get.toNamed(Routes.otp, arguments: {'mobile': mobile.text});
+      // The server answers with the code it issued (its OTP pool); the OTP screen shows it as a notification.
+      final issuedOtp = await _repo.requestOtp(mobile.text);
+      Get.toNamed(Routes.otp, arguments: {'mobile': mobile.text, 'otp': issuedOtp});
     } on AuthException catch (e) {
       error.value = e.message; // e.g. "This number is already registered. Please sign in."
     } catch (_) {

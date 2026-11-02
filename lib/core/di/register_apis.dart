@@ -1,10 +1,10 @@
+import 'package:creditsea/modules/profile/api/user_api.dart';
 import 'package:get/get.dart';
 
 import '../../modules/auth/api/auth_api.dart';
 import '../../modules/auth/services/session_service.dart';
 import '../../modules/loan/api/loan_api.dart';
 import '../../modules/onboarding/api/onboarding_api.dart';
-import '../../modules/profile/api/user_api.dart';
 import '../network/api_client.dart';
 import '../services/cache_service.dart';
 import '../services/secure_storage_service.dart';

@@ -6,7 +6,7 @@ import '../../auth/widgets/auth_tokens.dart';
 
 /// Kept for existing imports; values live in [FormTokens].
 abstract final class OnboardingTokens {
-  static const Color background = FormTokens.background;
+  static const Color background = Color.fromARGB(255, 255, 255, 255);
   static const Color border = FormTokens.border;
   static const Color ink = FormTokens.ink;
   static const double fieldHeight = FormTokens.fieldHeight;
@@ -29,7 +29,8 @@ InputDecoration onboardingDecoration(String hint, {bool error = false}) {
     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
     border: _border(idle),
     enabledBorder: _border(idle),
-    focusedBorder: _border(error ? AuthTokens.error : AuthTokens.actionBlue, 1.5),
+    focusedBorder:
+        _border(error ? AuthTokens.error : AuthTokens.actionBlue, 1.5),
   );
 }
 
@@ -38,7 +39,8 @@ class UpperCaseTextFormatter extends TextInputFormatter {
   const UpperCaseTextFormatter();
 
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) =>
+  TextEditingValue formatEditUpdate(
+          TextEditingValue oldValue, TextEditingValue newValue) =>
       newValue.copyWith(text: newValue.text.toUpperCase());
 }
 

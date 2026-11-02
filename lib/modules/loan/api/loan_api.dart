@@ -13,7 +13,7 @@ class LoanApi {
   final ApiClient _client;
   final CacheService _cache;
 
-  /// Never cached: it changes the moment a loan is accepted.
+  /// Never cached: it changes the moment a loan is accepted or repaid.
   Future<EligibilityDto> eligibility() => _client.getObject(ApiEndpoints.eligibility, EligibilityDto.fromJson);
 
   Future<LoanQuoteDto> quote(QuoteRequest r) =>
@@ -30,9 +30,17 @@ class LoanApi {
     return loan;
   }
 
-  /// Infinite-scroll list (used by My Loans). Only page 1 is cached; `refresh: true` for pull-to-refresh.
-  Future<PaginatedResponse<LoanDto>> list({int page = 1, int limit = 10, bool refresh = false}) =>
-      _client.getObject<PaginatedResponse<LoanDto>>(
+  /// Mock repayment. 409 NOT_REPAYABLE / ALREADY_REPAID.
+  Future<RepayResponseDto> repay(String id, RepayRequest r) async {
+    final res = await _client.postObject(ApiEndpoints.repayLoan(id), RepayResponseDto.fromJson, data: r.toJson());
+    await _cache.invalidate('/loans');
+    return res;
+  }
+
+  /// Infinite-scroll list (My Loans). Only page 1 is cached (2 min); `refresh: true` bypasses it.
+  /// `fromCache` lets the UI paint instantly and then revalidate silently.
+  Future<ApiResult<PaginatedResponse<LoanDto>>> list({int page = 1, int limit = 10, bool refresh = false}) =>
+      _client.getObjectResult<PaginatedResponse<LoanDto>>(
         ApiEndpoints.loans,
         (j) => PaginatedResponse<LoanDto>.fromJson(j, LoanDto.fromJson),
         query: {'page': page, 'limit': limit},

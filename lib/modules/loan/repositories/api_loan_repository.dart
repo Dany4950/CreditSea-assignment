@@ -6,6 +6,8 @@ import '../api/dto/loan_requests.dart';
 import '../api/loan_api.dart';
 import '../models/eligibility.dart';
 import '../models/loan.dart';
+import '../models/loan_page.dart';
+import '../models/repay_result.dart';
 import 'loan_repository.dart';
 
 /// Real LoanRepository: talks to the Render backend through [LoanApi] and
@@ -36,6 +38,29 @@ class ApiLoanRepository implements LoanRepository {
   @override
   Future<Loan> acceptOffer(String id) => _guard(() async => _toLoan(await _api.accept(id)));
 
+  @override
+  Future<LoanPage> fetchLoans({int page = 1, int limit = 10, bool refresh = false}) => _guard(() async {
+        final r = await _api.list(page: page, limit: limit, refresh: refresh);
+        return LoanPage(
+          items: r.data.items.map(_toLoan).toList(growable: false),
+          page: r.data.page,
+          hasMore: r.data.hasMore,
+          total: r.data.total,
+          fromCache: r.fromCache,
+        );
+      });
+
+  @override
+  Future<RepayResult> repay(String id, {String method = 'UPI'}) => _guard(() async {
+        final r = await _api.repay(id, RepayRequest(method: method));
+        return RepayResult(
+          loan: _toLoan(r.loan),
+          creditScore: r.creditScore,
+          scoreChange: r.scoreChange,
+          onTime: r.onTime,
+        );
+      });
+
   Loan _toLoan(LoanDto d) => Loan(
         id: d.id,
         applicationNo: d.applicationNo,
@@ -46,6 +71,11 @@ class ApiLoanRepository implements LoanRepository {
         processingFee: d.processingFee,
         status: _status(d.status),
         rejectionReason: d.rejectionReason,
+        createdAt: d.createdAt,
+        dueDate: d.dueDate,
+        repaidAt: d.repaidAt,
+        scoreChange: d.scoreChange,
+        isOverdue: d.isOverdue,
       );
 
   LoanStatus _status(String s) => switch (s) {
@@ -58,6 +88,7 @@ class ApiLoanRepository implements LoanRepository {
         'DISBURSING' => LoanStatus.disbursing,
         'DISBURSED' => LoanStatus.disbursed,
         'REJECTED' => LoanStatus.rejected,
+        'REPAID' => LoanStatus.repaid,
         _ => LoanStatus.submitted, // unknown future status: show as in progress rather than crash
       };
 

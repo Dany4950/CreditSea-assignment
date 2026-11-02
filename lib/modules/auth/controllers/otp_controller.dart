@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:creditsea/core/widgets/otp_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -24,6 +25,7 @@ class OtpController extends GetxController {
 
   Timer? _timer;
   bool _resending = false;
+  String? _issuedOtp; // the code the server issued for the request that opened this screen
 
   String get displayMobile => '+91 $mobile';
 
@@ -37,9 +39,18 @@ class OtpController extends GetxController {
     super.onInit();
     final args = Get.arguments;
     mobile = args is Map ? (args['mobile'] as String? ?? '') : '';
+    _issuedOtp = args is Map ? args['otp'] as String? : null;
     otp.addListener(_onChanged);
     _startTimer();
   }
+
+  @override
+  void onReady() {
+    super.onReady();
+    showOtpNotice(_issuedOtp, onFill: _fill); // like an incoming SMS; tap to fill the boxes
+  }
+
+  void _fill(String code) => otp.text = code;
 
   void _onChanged() {
     if (error.value != null) error.value = null;
@@ -88,10 +99,11 @@ class OtpController extends GetxController {
     if (secondsLeft.value > 0 || _resending) return;
     _resending = true;
     try {
-      await _repo.requestOtp(mobile);
+      final code = await _repo.requestOtp(mobile);
       otp.clear();
       _startTimer();
       focus.requestFocus();
+      showOtpNotice(code, onFill: _fill);
     } on AuthException catch (e) {
       error.value = e.message;
     } catch (_) {

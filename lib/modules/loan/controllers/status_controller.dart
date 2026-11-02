@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:creditsea/modules/profile/profile_pages.dart';
 import 'package:get/get.dart';
 import '../../../core/state/view_status.dart';
-import '../../../routes/app_routes.dart';
 import '../models/loan.dart';
 import '../repositories/loan_repository.dart';
 
@@ -67,14 +67,10 @@ class StatusController extends GetxController {
     }
   }
 
-  /// In progress: refresh now. Finished (disbursed/rejected): back to Home.
+  /// In progress: refresh now. Finished (disbursed/rejected/repaid): open the Profile
+  /// (details + all loans + "New loan" button), clearing the stack so Back never returns here.
   void onContinue() {
-    final l = loan.value;
-    if (l != null && l.isTerminal) {
-      Get.offAllNamed(Routes.calculator);
-    } else {
-      refresh();
-    }
+
   }
 
   @override

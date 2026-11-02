@@ -116,6 +116,7 @@ class _InfoBlock extends StatelessWidget {
             loan.rejectionReason ?? 'We could not approve your application at this time.',
             AuthTokens.error,
           ),
+    LoanStatus.repaid => throw UnimplementedError(),
       };
 
   @override

@@ -18,6 +18,9 @@ class LoanDto {
     this.rejectionReason,
     this.createdAt,
     this.dueDate,
+    this.repaidAt,
+    this.scoreChange,
+    this.isOverdue = false,
   });
 
   final String id;
@@ -29,11 +32,14 @@ class LoanDto {
   final int processingFee;
   final int totalPayable;
   final int disbursedAmount;
-  final String status; // OFFERED | SUBMITTED | UNDER_REVIEW | KYC | NACH | SIGN | DISBURSING | DISBURSED | REJECTED
-  final String statusLabel; // Submitted | Under Review | Approved | Rejected | Disbursed
+  final String status; // OFFERED | SUBMITTED | UNDER_REVIEW | KYC | NACH | SIGN | DISBURSING | DISBURSED | REJECTED | REPAID
+  final String statusLabel; // Submitted | Under Review | Approved | Rejected | Disbursed | Repaid
   final String? rejectionReason;
   final DateTime? createdAt;
   final DateTime? dueDate;
+  final DateTime? repaidAt;
+  final int? scoreChange;
+  final bool isOverdue;
 
   factory LoanDto.fromJson(Map<String, dynamic> j) => LoanDto(
         id: j['id'] as String,
@@ -50,5 +56,8 @@ class LoanDto {
         rejectionReason: asStringOrNull(j['rejectionReason']),
         createdAt: asDate(j['createdAt']),
         dueDate: asDate(j['dueDate']),
+        repaidAt: asDate(j['repaidAt']),
+        scoreChange: j['scoreChange'] is num ? (j['scoreChange'] as num).toInt() : null,
+        isOverdue: j['isOverdue'] == true,
       );
 }

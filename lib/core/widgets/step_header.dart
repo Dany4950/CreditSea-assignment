@@ -16,7 +16,11 @@ class StepHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           for (var i = 0; i < _labels.length; i++)
-            _Step(number: i + 1, label: _labels[i], active: i == current, done: i < current),
+            _Step(
+                number: i + 1,
+                label: _labels[i],
+                active: i == current,
+                done: i < current),
         ],
       ),
     );
@@ -24,7 +28,11 @@ class StepHeader extends StatelessWidget {
 }
 
 class _Step extends StatelessWidget {
-  const _Step({required this.number, required this.label, required this.active, required this.done});
+  const _Step(
+      {required this.number,
+      required this.label,
+      required this.active,
+      required this.done});
   final int number;
   final String label;
   final bool active;
@@ -49,7 +57,8 @@ class _Step extends StatelessWidget {
             height: 24,
             child: Center(
               child: done
-                  ? const Icon(Icons.check_rounded, size: 15, color: Colors.white)
+                  ? const Icon(Icons.check_rounded,
+                      size: 15, color: Colors.white)
                   : Text('$number',
                       style: TextStyle(
                           fontSize: 12,

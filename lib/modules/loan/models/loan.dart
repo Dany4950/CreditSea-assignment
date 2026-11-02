@@ -1,6 +1,6 @@
 import 'loan_quote.dart';
 
-enum LoanStatus { offered, submitted, underReview, kyc, nach, sign, disbursing, disbursed, rejected }
+enum LoanStatus { offered, submitted, underReview, kyc, nach, sign, disbursing, disbursed, rejected, repaid }
 
 enum StepState { done, current, pending, error }
 
@@ -15,6 +15,11 @@ class Loan {
     required this.processingFee,
     required this.status,
     this.rejectionReason,
+    this.createdAt,
+    this.dueDate,
+    this.repaidAt,
+    this.scoreChange,
+    this.isOverdue = false,
   });
 
   final String id;
@@ -26,9 +31,27 @@ class Loan {
   final int processingFee;
   final LoanStatus status;
   final String? rejectionReason;
+  final DateTime? createdAt;
+  final DateTime? dueDate;
+  final DateTime? repaidAt;
+
+  /// Credit score change caused by repaying this loan (+50 on time, -30 late).
+  final int? scoreChange;
+  final bool isOverdue;
 
   int get totalPayable => principal + interest;
   int get disbursed => principal - processingFee;
+
+  /// The brief's chain: Submitted -> Under Review -> Approved/Rejected -> Disbursed (+ Repaid).
+  String get statusLabel => switch (status) {
+        LoanStatus.offered => 'Offered',
+        LoanStatus.submitted => 'Submitted',
+        LoanStatus.underReview => 'Under Review',
+        LoanStatus.kyc || LoanStatus.nach || LoanStatus.sign || LoanStatus.disbursing => 'Approved',
+        LoanStatus.disbursed => 'Disbursed',
+        LoanStatus.rejected => 'Rejected',
+        LoanStatus.repaid => 'Repaid',
+      };
 
   static const stepLabels = [
     'Application Submitted',
@@ -49,6 +72,11 @@ class Loan {
         processingFee: processingFee,
         status: status ?? this.status,
         rejectionReason: rejectionReason ?? this.rejectionReason,
+        createdAt: createdAt,
+        dueDate: dueDate,
+        repaidAt: repaidAt,
+        scoreChange: scoreChange,
+        isOverdue: isOverdue,
       );
 
   factory Loan.fromQuote({
@@ -67,6 +95,7 @@ class Loan {
         interest: quote.interest,
         processingFee: quote.processingFee,
         status: status,
+        createdAt: DateTime.now(),
       );
 
   /// Index of the step in progress (6 = everything done).
@@ -80,6 +109,7 @@ class Loan {
         LoanStatus.disbursing => 5,
         LoanStatus.disbursed => 6,
         LoanStatus.rejected => 1,
+        LoanStatus.repaid => 6,
       };
 
   StepState stepState(int i) {
@@ -91,5 +121,7 @@ class Loan {
     return StepState.pending;
   }
 
-  bool get isTerminal => status == LoanStatus.disbursed || status == LoanStatus.rejected;
+  /// The status screen stops polling here.
+  bool get isTerminal =>
+      status == LoanStatus.disbursed || status == LoanStatus.rejected || status == LoanStatus.repaid;
 }

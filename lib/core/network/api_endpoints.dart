@@ -27,4 +27,5 @@ abstract class ApiEndpoints {
   static const loans = '/loans';
   static String loanById(String id) => '/loans/$id';
   static String acceptLoan(String id) => '/loans/$id/accept';
+  static String repayLoan(String id) => '/loans/$id/repay';
 }

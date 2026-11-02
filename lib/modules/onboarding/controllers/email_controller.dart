@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:creditsea/core/widgets/otp_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -114,12 +115,14 @@ class EmailController extends GetxController {
     }
     sending.value = true;
     try {
-      await _repo.sendEmailOtp(email.text.trim());
+      // The server answers with the code it issued (its OTP pool); null when it emailed a real code instead.
+      final issuedOtp = await _repo.sendEmailOtp(email.text.trim());
       otp.clear();
       otpSent.value = true;
       _startTimer();
       _recompute();
       otpFocus.requestFocus();
+      showOtpNotice(issuedOtp, onFill: (c) => otp.text = c);
     } on OnboardingException catch (e) {
       emailError.value = e.message;
     } catch (_) {

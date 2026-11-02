@@ -1,4 +1,5 @@
 import '../../../../core/network/api_models.dart';
+import 'loan_dto.dart';
 
 /// POST /loans/apply. The server recomputes pricing; the client's numbers are display-only.
 class ApplyLoanRequest {
@@ -41,5 +42,33 @@ class LoanQuoteDto {
         processingFee: asInt(j['processingFee']),
         totalPayable: asInt(j['totalPayable']),
         disbursed: asInt(j['disbursed']),
+      );
+}
+
+/// POST /loans/:id/repay  (mock payment). method: UPI | CARD | NETBANKING
+class RepayRequest {
+  const RepayRequest({this.method = 'UPI'});
+  final String method;
+  Map<String, dynamic> toJson() => {'method': method};
+}
+
+class RepayResponseDto {
+  const RepayResponseDto({
+    required this.loan,
+    required this.creditScore,
+    required this.scoreChange,
+    required this.onTime,
+  });
+
+  final LoanDto loan;
+  final int creditScore;
+  final int scoreChange;
+  final bool onTime;
+
+  factory RepayResponseDto.fromJson(Map<String, dynamic> j) => RepayResponseDto(
+        loan: LoanDto.fromJson(Map<String, dynamic>.from(j['loan'] as Map)),
+        creditScore: asInt(j['creditScore']),
+        scoreChange: asInt(j['scoreChange']),
+        onTime: j['onTime'] == true,
       );
 }

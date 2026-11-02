@@ -12,10 +12,20 @@ import 'api_endpoints.dart';
 import 'api_exception.dart';
 import 'api_models.dart';
 
+/// A parsed response plus where it came from.
+class ApiResult<T> {
+  const ApiResult(this.data, {this.fromCache = false});
+  final T data;
+
+  /// true when served from the local TTL cache (no network request was made).
+  final bool fromCache;
+}
+
 /// The single HTTP entry point of the app.
 ///
 ///  - raw helpers (get/post/put/patch) return decoded JSON
 ///  - typed helpers (getObject/postObject/putObject) return a parsed model
+///  - getObjectResult also tells whether the answer came from the cache
 ///  - every failure is thrown as [ApiException]
 class ApiClient extends GetxService {
   ApiClient({required SecureStorageService storage, required CacheService cache}) {
@@ -57,8 +67,17 @@ class ApiClient extends GetxService {
     Map<String, dynamic>? query,
     Duration? cacheTtl,
     bool refresh = false,
+  }) async =>
+      (await getResponse(path, query: query, cacheTtl: cacheTtl, refresh: refresh)).data;
+
+  /// Like [get] but returns the whole response (its `extra['fromCache']` tells if the cache answered).
+  Future<Response<dynamic>> getResponse(
+    String path, {
+    Map<String, dynamic>? query,
+    Duration? cacheTtl,
+    bool refresh = false,
   }) =>
-      _send(() => dio.get<dynamic>(
+      _sendResponse(() => dio.get<dynamic>(
             path,
             queryParameters: query,
             options: Options(extra: {'ttl': cacheTtl?.inSeconds, 'refresh': refresh}),
@@ -79,6 +98,17 @@ class ApiClient extends GetxService {
   }) async =>
       fromJson(_asMap(await get(path, query: query, cacheTtl: cacheTtl, refresh: refresh)));
 
+  Future<ApiResult<T>> getObjectResult<T>(
+    String path,
+    FromJson<T> fromJson, {
+    Map<String, dynamic>? query,
+    Duration? cacheTtl,
+    bool refresh = false,
+  }) async {
+    final res = await getResponse(path, query: query, cacheTtl: cacheTtl, refresh: refresh);
+    return ApiResult<T>(fromJson(_asMap(res.data)), fromCache: res.extra['fromCache'] == true);
+  }
+
   Future<T> postObject<T>(String path, FromJson<T> fromJson, {Object? data}) async =>
       fromJson(_asMap(await post(path, data: data)));
 
@@ -87,9 +117,11 @@ class ApiClient extends GetxService {
 
   // -------------------------------------------------------------- internal
 
-  Future<dynamic> _send(Future<Response<dynamic>> Function() call) async {
+  Future<dynamic> _send(Future<Response<dynamic>> Function() call) async => (await _sendResponse(call)).data;
+
+  Future<Response<dynamic>> _sendResponse(Future<Response<dynamic>> Function() call) async {
     try {
-      return (await call()).data;
+      return await call();
     } on DioException catch (e) {
       throw ApiException.from(e);
     }
@@ -160,7 +192,7 @@ class _CacheInterceptor extends Interceptor {
 }
 
 /// One retry for GETs that failed on a connection problem (typical during a Render cold start).
-/// POST/PUT are never retried automatically: they are not idempotent (OTP sends, loan apply).
+/// POST/PUT are never retried automatically: they are not idempotent (OTP sends, loan apply, repay).
 class _RetryInterceptor extends Interceptor {
   _RetryInterceptor(this._dio);
   final Dio _dio;
