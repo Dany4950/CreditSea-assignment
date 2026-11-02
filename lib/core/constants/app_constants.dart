@@ -15,6 +15,7 @@ class AppCurves {
 class AppHero {
   AppHero._();
   static const String logo = 'assets/images/logo.png';
+  static const String logoText = 'assets/images/logo_text.png';
 }
 
 class AppAssets {

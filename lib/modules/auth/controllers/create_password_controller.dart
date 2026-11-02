@@ -63,6 +63,8 @@ class CreatePasswordController extends GetxController {
       TextInput.finishAutofillContext();
       // Account created -> user signs in with the new credentials.
       Get.offAllNamed(Routes.signIn, arguments: {'mobile': mobile, 'registered': true});
+    } on AuthException catch (e) {
+      confirmError.value = e.message;
     } catch (_) {
       confirmError.value = 'Could not set password. Please try again.';
     } finally {

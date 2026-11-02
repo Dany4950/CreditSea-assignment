@@ -92,6 +92,8 @@ class OtpController extends GetxController {
       otp.clear();
       _startTimer();
       focus.requestFocus();
+    } on AuthException catch (e) {
+      error.value = e.message;
     } catch (_) {
       error.value = 'Could not resend OTP. Please try again.';
     } finally {

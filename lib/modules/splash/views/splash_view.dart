@@ -13,10 +13,7 @@ class SplashView extends GetView<SplashController> {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.primary,
-      body: Center(
-        // Isolates the animation's repaints from the rest of the tree.
-        child: RepaintBoundary(child: _FadeScaleIn(child: AppLogo(width: 210))),
-      ),
+      body: (RepaintBoundary(child: Center(child: AppLogo(width: 180)))),
     );
   }
 }

@@ -28,7 +28,7 @@ class SplashController extends GetxController {
 
   /// Returns the route to open, or null if the 401 interceptor already redirected.
   Future<String?> _resolveRoute() async {
-    if (!_storage.hasToken) return Routes.createAccount;
+   return Routes.createAccount;
 
     try {
       // Backend contract: GET /user/profile -> { profileComplete: bool, ... }

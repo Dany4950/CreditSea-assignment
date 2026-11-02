@@ -1,15 +1,19 @@
+import 'package:creditsea/core/widgets/app_logo_text.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../../../core/widgets/app_logo.dart';
+
 import 'auth_slides.dart';
 import 'auth_tokens.dart';
 
-/// Blue header. With [pager] it is a live auto-sliding carousel (Create
-/// Account); without it, it shows the fixed slide [page] (OTP = 1,
-/// Password = 2). Wrapped in a RepaintBoundary and never rebuilt by the
-/// keyboard.
+/// Blue header. With [pager] it is a live auto-sliding carousel.
+/// Without it, it shows the fixed slide [page].
 class AuthHeader extends StatelessWidget {
-  const AuthHeader({super.key, this.page = 0, this.pager});
+  const AuthHeader({
+    super.key,
+    this.page = 0,
+    this.pager,
+  });
+
   final int page;
   final PageController? pager;
 
@@ -25,19 +29,30 @@ class AuthHeader extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 28),
-                const AppLogo(),
+
+                const AppLogoText(),
+
                 const SizedBox(height: 20),
+
                 Expanded(
                   child: pager == null
-                      ? _SlideView(slide: authSlides[page])
+                      ? _SlideView(
+                          slide: authSlides[page],
+                        )
                       : PageView.builder(
                           controller: pager,
                           itemCount: authSlides.length,
                           physics: const BouncingScrollPhysics(),
-                          itemBuilder: (_, i) => _SlideView(slide: authSlides[i]),
+                          itemBuilder: (_, index) {
+                            return _SlideView(
+                              slide: authSlides[index],
+                            );
+                          },
                         ),
                 ),
+
                 const SizedBox(height: 8),
+
                 pager == null
                     ? _StaticDots(active: page)
                     : SmoothPageIndicator(
@@ -61,31 +76,48 @@ class AuthHeader extends StatelessWidget {
   }
 }
 
+/// Static indicator used when there is no PageController.
 class _StaticDots extends StatelessWidget {
-  const _StaticDots({required this.active});
+  const _StaticDots({
+    required this.active,
+  });
+
   final int active;
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < authSlides.length; i++)
-            Padding(
-              padding: EdgeInsets.only(left: i == 0 ? 0 : 8),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: i == active ? Colors.white : const Color(0x66FFFFFF),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: SizedBox(width: i == active ? 24 : 8, height: 8),
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < authSlides.length; i++)
+          Padding(
+            padding: EdgeInsets.only(
+              left: i == 0 ? 0 : 8,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: i == active
+                    ? Colors.white
+                    : const Color(0x66FFFFFF),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: SizedBox(
+                width: i == active ? 24 : 8,
+                height: 8,
               ),
             ),
-        ],
-      );
+          ),
+      ],
+    );
+  }
 }
 
+/// Individual onboarding/auth slide.
 class _SlideView extends StatelessWidget {
-  const _SlideView({required this.slide});
+  const _SlideView({
+    required this.slide,
+  });
+
   final AuthSlide slide;
 
   @override
@@ -95,75 +127,178 @@ class _SlideView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          /// Multiple visuals → Grid
           slide.isGrid
               ? SizedBox(
                   width: 180,
                   child: Wrap(
+                    alignment: WrapAlignment.center,
                     spacing: 24,
                     runSpacing: 24,
                     children: [
-                      for (final i in slide.icons)
-                        _IconTile(icon: i, size: 78, iconSize: 38, radius: 14),
+                      for (final visual in slide.visuals)
+                        _VisualTile(
+                          visual: visual,
+                          size: 78,
+                          visualSize: 38,
+                          radius: 14,
+                        ),
                     ],
                   ),
                 )
-              : _IconTile(
-                  icon: slide.icons.first,
+
+              /// Single visual → Large tile
+              : _VisualTile(
+                  visual: slide.visuals.first,
                   watermark: slide.watermark,
                   size: 180,
-                  iconSize: 76,
+                  visualSize: 76,
                   radius: 20,
                 ),
+
           const SizedBox(height: 22),
-          Text(slide.title,
-              style: const TextStyle(
-                  color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)),
+
+          Text(
+            slide.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
           const SizedBox(height: 4),
-          Text(slide.subtitle,
-              style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 12)),
+
+          Text(
+            slide.subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xB3FFFFFF),
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _IconTile extends StatelessWidget {
-  const _IconTile({
-    required this.icon,
+/// Tile supporting both Material Icons and image assets.
+///
+/// - Icon: shown centered inside the colored tile.
+/// - Image: fills the complete tile.
+class _VisualTile extends StatelessWidget {
+  const _VisualTile({
+    required this.visual,
     required this.size,
-    required this.iconSize,
+    required this.visualSize,
     required this.radius,
     this.watermark,
   });
-  final IconData icon;
-  final IconData? watermark;
+
+  final AuthVisual visual;
+  final AuthVisual? watermark;
+
   final double size;
-  final double iconSize;
+  final double visualSize;
   final double radius;
 
   @override
   Widget build(BuildContext context) {
-    final r = BorderRadius.circular(radius);
+    final borderRadius = BorderRadius.circular(radius);
+
+    /// IMAGE → Fill the complete tile.
+    if (visual.isImage) {
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Image.asset(
+            visual.imagePath!,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) {
+              return const ColoredBox(
+                color: AuthTokens.tile,
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    /// ICON → Show inside the colored tile.
     return DecoratedBox(
-      decoration: BoxDecoration(color: AuthTokens.tile, borderRadius: r),
+      decoration: BoxDecoration(
+        color: AuthTokens.tile,
+        borderRadius: borderRadius,
+      ),
       child: ClipRRect(
-        borderRadius: r,
+        borderRadius: borderRadius,
         child: SizedBox(
           width: size,
           height: size,
           child: Stack(
             children: [
+              /// Optional watermark.
               if (watermark != null)
                 Positioned(
                   right: -size * 0.08,
                   bottom: -size * 0.08,
-                  child: Icon(watermark, size: size * 0.6, color: const Color(0x1FFFFFFF)),
+                  child: _buildWatermark(
+                    watermark!,
+                    size: size * 0.6,
+                  ),
                 ),
-              Center(child: Icon(icon, size: iconSize, color: Colors.white)),
+
+              /// Main icon.
+              Center(
+                child: Icon(
+                  visual.icon,
+                  size: visualSize,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildWatermark(
+    AuthVisual watermark, {
+    required double size,
+  }) {
+    /// Icon watermark.
+    if (watermark.isIcon) {
+      return Icon(
+        watermark.icon,
+        size: size,
+        color: const Color(0x1FFFFFFF),
+      );
+    }
+
+    /// Image watermark.
+    if (watermark.isImage) {
+      return Opacity(
+        opacity: 0.12,
+        child: Image.asset(
+          watermark.imagePath!,
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }

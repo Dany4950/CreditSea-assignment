@@ -26,9 +26,10 @@ class _Form extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const AuthSheetTitle('Welcome to Credit Sea!',
-            fontSize: 20, fontWeight: FontWeight.w700),
+            fontSize: 20, fontWeight: FontWeight.w600),
         const SizedBox(height: 12),
-        const Text('Mobile Number', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+        const Text('Mobile Number',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         PhoneField(controller: c.mobile, onSubmitted: c.requestOtp),
         Obx(() {
@@ -37,7 +38,9 @@ class _Form extends StatelessWidget {
               ? const SizedBox(height: 20)
               : Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Text(e, style: const TextStyle(color: AuthTokens.error, fontSize: 12)),
+                  child: Text(e,
+                      style: const TextStyle(
+                          color: AuthTokens.error, fontSize: 12)),
                 );
         }),
         _TermsRow(c: c),
@@ -53,7 +56,9 @@ class _Form extends StatelessWidget {
             onPressed: c.goToSignIn,
             child: const Text('Existing User? Sign in',
                 style: TextStyle(
-                    color: AuthTokens.primaryDark, fontWeight: FontWeight.w600, fontSize: 15)),
+                    color: AuthTokens.primaryDark,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15)),
           ),
         ),
       ],
@@ -65,10 +70,14 @@ class _TermsRow extends StatelessWidget {
   const _TermsRow({required this.c});
   final CreateAccountController c;
 
-  static const _base = TextStyle(fontSize: 12, color: AuthTokens.textMuted, height: 1.5);
+  static const _base =
+      TextStyle(fontSize: 12, color: AuthTokens.textMuted, height: 1.5);
   static const _link = TextStyle(
-      fontSize: 12, fontWeight: FontWeight.w700, color: AuthTokens.textMuted,
-      decoration: TextDecoration.underline, height: 1.5);
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AuthTokens.textMuted,
+      decoration: TextDecoration.underline,
+      height: 1.5);
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +97,14 @@ class _TermsRow extends StatelessWidget {
                     color: c.agreed.value ? AuthTokens.success : Colors.white,
                     borderRadius: BorderRadius.circular(5),
                     border: Border.all(
-                        color: c.agreed.value ? AuthTokens.success : AuthTokens.border, width: 1.5),
+                        color: c.agreed.value
+                            ? AuthTokens.success
+                            : AuthTokens.border,
+                        width: 1.5),
                   ),
                   child: c.agreed.value
-                      ? const Icon(Icons.check_rounded, size: 18, color: Colors.white)
+                      ? const Icon(Icons.check_rounded,
+                          size: 18, color: Colors.white)
                       : null,
                 )),
           ),

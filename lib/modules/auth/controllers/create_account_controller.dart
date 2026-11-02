@@ -65,6 +65,8 @@ class CreateAccountController extends GetxController {
     try {
       await _repo.requestOtp(mobile.text);
       Get.toNamed(Routes.otp, arguments: {'mobile': mobile.text});
+    } on AuthException catch (e) {
+      error.value = e.message; // e.g. "This number is already registered. Please sign in."
     } catch (_) {
       error.value = 'Could not send OTP. Please try again.';
     } finally {

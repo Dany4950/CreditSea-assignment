@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'core/constants/app_constants.dart';
+import 'core/di/register_apis.dart';
+import 'core/di/register_repositories.dart';
 import 'core/network/api_client.dart';
 import 'core/services/cache_service.dart';
 import 'core/services/secure_storage_service.dart';
@@ -28,6 +32,10 @@ Future<void> main() async {
   final storage = await Get.putAsync(() => SecureStorageService().init(), permanent: true);
   final cache = await Get.putAsync(() => CacheService().init(), permanent: true);
   Get.put(ApiClient(storage: storage, cache: cache), permanent: true);
+
+  registerApis(); // AuthApi, UserApi, OnboardingApi, LoanApi, SessionService
+  registerRepositories(); // real repositories replace the mocks
+  unawaited(Get.find<ApiClient>().warmUp()); // wakes the sleeping Render server while the splash shows
 
   runApp(const CreditSeaApp());
 }
